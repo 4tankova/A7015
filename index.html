@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>А ти знаєш керівний склад</title>
+  <!-- Favicon / App icons -->
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="icon" type="image/png" href="images/favicon.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#121735" />
+  <style>
+    :root{
+      --bg-dark:#0b1020; --card-dark:#121735; --muted-dark:#9aa4c7; --accent-dark:#5b8cff; --accent2-dark:#7cf4ff; --ring-dark:rgba(124,244,255,.25);
+      --bg-light:#f6f7fb; --card-light:#ffffff; --muted-light:#4a536d; --accent-light:#3461ff; --accent2-light:#00d4ff; --ring-light:rgba(52,97,255,.2);
+    }
+    [data-theme="dark"]{ --bg:var(--bg-dark); --card:var(--card-dark); --muted:var(--muted-dark); --accent:var(--accent-dark); --accent-2:var(--accent2-dark); --ring:var(--ring-dark); --text:#e8ecff; --surface-2:#0f1431; --surface-3:#121a3d; }
+    [data-theme="light"]{ --bg:var(--bg-light); --card:var(--card-light); --muted:var(--muted-light); --accent:var(--accent-light); --accent-2:var(--accent2-light); --ring:var(--ring-light); --text:#0b1020; --surface-2:#fff; --surface-3:#eef2ff; }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial;color:var(--text);background:var(--bg);transition:background .4s,color .4s}
+    .app{max-width:1100px;margin:clamp(16px,4vmin,40px) auto;padding:0 16px}
+    header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between;margin-bottom:16px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 10px 30px var(--ring);position:relative;overflow:hidden;display:grid;place-items:center}
+    .logo img{width:100%;height:100%;object-fit:cover}
+    .logo:after{content:"";position:absolute;inset:0;background:radial-gradient(40px 40px at 80% 10%, #fff4, transparent)}
+    h1{font-size:clamp(20px,3vmin,32px);margin:0}
+    .sub{color:var(--muted);font-size:14px}
+
+    .card{position:relative;background:var(--card);border:1px solid rgba(124,244,255,.08);box-shadow:0 20px 50px rgba(0,0,0,.15);border-radius:20px;padding:clamp(12px,2.4vmin,24px)}
+
+    .hud{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:16px}
+    .badge{padding:6px 10px;border:1px solid rgba(124,244,255,.18);border-radius:999px;font-size:12px;color:var(--muted)}
+    .progress{height:8px;background:#1b2145;border-radius:999px;overflow:hidden;outline:1px solid rgba(124,244,255,.15)}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s}
+
+    .question{display:grid;gap:12px;margin:8px 0 4px}
+    .pos{font-size:clamp(18px,2.4vmin,22px)}
+    .rank{font-size:14px;color:var(--muted)}
+
+    .options{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:700px){.options{grid-template-columns:1fr}}
+    button.choice{display:flex;gap:10px;align-items:center;width:100%;background:var(--surface-2);color:var(--text);border:1px solid rgba(124,244,255,.12);padding:12px 14px;border-radius:14px;cursor:pointer;text-align:left;font-size:15px;transition:transform .06s ease,border-color .2s ease,background .2s ease}
+    button.choice:hover{transform:translateY(-1px);border-color:rgba(124,244,255,.34);background:var(--surface-3)}
+    button.choice.correct{border-color:rgba(34,197,94,.7);box-shadow:0 0 0 3px rgba(34,197,94,.15) inset}
+    button.choice.wrong{border-color:rgba(239,68,68,.7);box-shadow:0 0 0 3px rgba(239,68,68,.12) inset}
+
+    /* ЗБІЛЬШЕНІ ФОТО ПІД ЧАС РОЗКРИТТЯ ВІДПОВІДІ */
+    .reveal{margin-top:14px;display:none;grid-template-columns:160px 1fr;gap:16px;align-items:center}
+    .photo{width:160px;height:160px;border-radius:18px;overflow:hidden;border:1px solid rgba(124,244,255,.15);background:#0e1538;cursor:zoom-in}
+    .photo img{width:100%;height:100%;object-fit:cover}
+    .caption b{font-size:20px}
+    .caption .small{font-size:13px;color:var(--muted)}
+
+    .footer{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:16px}
+    .pill{background:var(--surface-2);border:1px solid rgba(124,244,255,.12);color:var(--muted);font-size:13px;padding:8px 10px;border-radius:999px}
+    .btn{appearance:none;border:0;cursor:pointer;padding:12px 16px;border-radius:12px;font-weight:600;color:#0b1020;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 10px 30px var(--ring)}
+    .btn:disabled{opacity:.6;filter:grayscale(.3);cursor:not-allowed}
+
+    .toast{position:fixed;inset:auto 20px 20px auto;background:var(--card);border:1px solid rgba(124,244,255,.2);padding:10px 14px;border-radius:12px;color:var(--text);box-shadow:0 20px 50px rgba(0,0,0,.4);opacity:0;transform:translateY(6px);transition:.4s}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    .developer{margin-top:32px;text-align:center;font-size:13px;color:var(--muted)}
+    .themeToggle{margin-left:auto;cursor:pointer;border:0;background:none;font-size:14px;color:var(--muted)}
+
+    /* ПІДСУМКОВИЙ ЕКРАН — ТРОХИ БІЛЬШІ ФОТО */
+    .results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+    .result-card{background:var(--card);border:1px solid rgba(124,244,255,.12);border-radius:16px;padding:12px;display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+    .result-photo{width:96px;height:96px;border-radius:14px;overflow:hidden;border:1px solid rgba(124,244,255,.15);background:#0e1538;cursor:zoom-in}
+    .result-photo img{width:100%;height:100%;object-fit:cover}
+    .result-title{font-weight:700}
+    .result-sub{font-size:12px;color:var(--muted)}
+    .tag{margin-left:auto;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid currentColor}
+    .tag.ok{color:#22c55e}
+    .tag.bad{color:#ef4444}
+
+    /* ЛАЙТБОКС для збільшення фото */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;z-index:1000}
+    .lightbox.show{display:grid}
+    .lightbox img{max-width:92vw;max-height:92vh;border-radius:18px;box-shadow:0 20px 70px rgba(0,0,0,.6)}
+    .lightbox .close{position:fixed;top:18px;right:18px;background:#fff;border:0;border-radius:999px;padding:10px 12px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="false" title="Логотип">
+          <!-- Додайте свій логотип сюди: -->
+          <img src="images/logo.png" alt="Логотип" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <h1>А ти знаєш керівний склад A7015</h1>
+          <div class="sub">Вгадай, хто обіймає вказану посаду.</div>
+        </div>
+      </div>
+      <button class="themeToggle" id="themeToggle" type="button" title="Перемкнути тему">🌙 Тема</button>
+      <div class="badge" id="scoreBadge">0 / 0</div>
+    </header>
+
+    <section class="card" id="gameCard" aria-live="polite"></section>
+
+    <div class="footer">
+      <span class="pill" id="statusPill">Готові? Натискайте «Почати»!</span>
+      <div style="display:flex; gap:8px">
+        <button class="btn" id="nextBtn" type="button" disabled>Далі</button>
+        <button class="btn" id="startBtn" type="button">Почати</button>
+      </div>
+    </div>
+
+    <div class="developer">Розробник: Юлія Швидченко, ППП РВБ 4 ОВМБр</div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Лайтбокс -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="close" id="lightboxClose" aria-label="Закрити">✕</button>
+    <img id="lightboxImg" alt="Збільшене фото">
+  </div>
+
+  <template id="questionTmpl">
+    <div class="hud">
+      <div class="badge" id="qCounter"></div>
+      <div class="badge" id="qTimer">⏱️ <span>20</span> с</div>
+      <div class="progress" aria-hidden="true"><div class="bar" id="qBar"></div></div>
+    </div>
+    <div class="question">
+      <div class="pos" id="pos"></div>
+      <div class="rank" id="rank"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="reveal" id="reveal">
+      <div class="photo" id="photo"></div>
+      <div class="caption">
+        <div class="small">Правильна відповідь:</div>
+        <div id="captionText"><b></b><div class="small"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function(){
+      // ===== ТЕМА =====
+      const html = document.documentElement;
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      html.setAttribute('data-theme', saved || (prefersDark? 'dark':'light'));
+      const themeBtn = document.getElementById('themeToggle');
+      const updThemeBtn=()=>{ themeBtn.textContent = html.getAttribute('data-theme')==='dark' ? '🌙 Тема' : '🌞 Тема'; };
+      updThemeBtn();
+      themeBtn.addEventListener('click', ()=>{ const next = html.getAttribute('data-theme')==='dark'?'light':'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); updThemeBtn(); });
+
+      // ===== Дані (ДОДАЙТЕ свої фото тут у полі imageUrl) =====
+      const PEOPLE = [
+        {name:"ОСТИМЧУК Ігор Васильович", rank:"полковник", position:"Командир військової частини", imageUrl:"images/ostymchuk.jpg"},
+        {name:"ЄРОХОВЕЦЬ Володимир Васильович", rank:"полковник", position:"Заступник командира військової частини", imageUrl:"images/yerokhovets.jpg"},
+        {name:"ФЕДОРОВ Дмитро Олександрович", rank:"підполковник", position:"Начальник артилерії — заступник командира військової частини", imageUrl:"images/fedorov.jpg"},
+        {name:"ЧЕРЕВКО Петро Сергійович", rank:"полковник", position:"Начальник штабу — заступник командира військової частини", imageUrl:"images/cherevko.jpg"},
+        {name:"ГАРАСИМЯК Петро Миколайович", rank:"підполковник", position:"Заступник командира з психологічної підтримки персоналу – начальник відділення психологічної підтримки персоналу військової частини", imageUrl:"images/harasymiak.jpg"},
+        {name:"ЧОРНОБАЙ Василь Дмитрович", rank:"підполковник", position:"Начальник логістики — заступник командира військової частини", imageUrl:"images/chornobai.jpg"},
+        {name:"ПАВЛОВ Сергій Володимирович", rank:"полковник", position:"Начальник озброєння — заступник начальника логістики військової частини", imageUrl:"images/pavlov.jpg"},
+        {name:"ХМІЛЬ Сергій Ананійович", rank:"підполковник", position:"Начальник тилу — заступник начальника логістики військової частини", imageUrl:"images/khmil.jpg"},
+        {name:"КОШПЕТРУК Максим Петрович", rank:"головний сержант", position:"Головний сержант військової частини", imageUrl:"images/koshpetruk.jpg"},
+      ];
+
+      // ===== Утиліти =====
+      const $ = s=>document.querySelector(s);
+      const el = (t,cls,txt)=>{const e=document.createElement(t); if(cls) e.className=cls; if(txt) e.textContent=txt; return e};
+      const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+      function initialsAvatar(name){
+        const letters = name.split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const hue = Math.floor((name.length*37)%360);
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 96 96'>
+          <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='hsl(${hue},70%,55%)'/><stop offset='1' stop-color='hsl(${(hue+60)%360},70%,55%)'/></linearGradient></defs>
+          <rect x='0' y='0' width='96' height='96' rx='16' fill='url(#g)'/>
+          <text x='50%' y='58%' text-anchor='middle' font-family='Inter, system-ui' font-size='36' fill='white' font-weight='700'>${letters}</text>
+        </svg>`;
+        return `data:image/svg+xml;base64,${btoa(svg)}`;
+      }
+
+      // ===== ЛАЙТБОКС =====
+      const lightbox = $('#lightbox');
+      const lightboxImg = $('#lightboxImg');
+      const lightboxClose = $('#lightboxClose');
+      function openLightbox(src, alt){ lightboxImg.src = src; lightboxImg.alt = alt||''; lightbox.classList.add('show'); lightbox.setAttribute('aria-hidden','false'); }
+      function closeLightbox(){ lightbox.classList.remove('show'); lightbox.setAttribute('aria-hidden','true'); lightboxImg.src=''; }
+      lightbox.addEventListener('click', (e)=>{ if(e.target===lightbox) closeLightbox(); });
+      lightboxClose.addEventListener('click', closeLightbox);
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLightbox(); });
+
+      // ===== Стан =====
+      const state = { order: [], idx: 0, score: 0, timer:null, timeLeft:20, log:[], answered:false };
+      window.state = state;
+
+      function updateScore(){ const b=$('#scoreBadge'); if(b) b.textContent = `${state.score} / ${state.idx}`; }
+      window.updateScore = updateScore;
+
+      function renderQuestion(q){
+        const tmpl = document.getElementById('questionTmpl').content.cloneNode(true);
+        tmpl.getElementById('pos').textContent = q.position;
+        tmpl.getElementById('rank').textContent = `Звання: ${q.rank}`;
+        tmpl.getElementById('qCounter').textContent = `Питання ${state.idx+1}`;
+
+        const optsWrap = tmpl.getElementById('options');
+        const pool = shuffle(PEOPLE.filter(p=>p.name!==q.name)).slice(0,3);
+        const options = shuffle([q.name, ...pool.map(p=>p.name)]);
+        options.forEach(name=>{
+          const btn = el('button','choice'); btn.type='button';
+          btn.innerHTML = `<span aria-hidden="true">👤</span><span>${name}</span>`;
+          btn.addEventListener('click', ()=>handleAnswer(btn, name===q.name, name));
+          optsWrap.appendChild(btn);
+        });
+
+        const card = $('#gameCard'); card.innerHTML=''; const wrap = el('div'); wrap.appendChild(tmpl); card.appendChild(wrap);
+        // HUD refs
+        return { timerSpan: card.querySelector('#qTimer span'), bar: card.querySelector('#qBar') };
+      }
+
+      function startTimer(hud){
+        const {timerSpan, bar} = hud;
+        state.timeLeft = 20; if(timerSpan) timerSpan.textContent = state.timeLeft; if(bar) bar.style.width='0%';
+        const total = state.timeLeft;
+        clearInterval(state.timer);
+        state.timer = setInterval(()=>{
+          state.timeLeft--; if(timerSpan) timerSpan.textContent = state.timeLeft; if(bar) bar.style.width = `${100*(1 - state.timeLeft/total)}%`;
+          if(state.timeLeft<=0){ clearInterval(state.timer); if(!state.answered){ state.log.push({person: state.order[state.idx], correct:false, selected:null}); $('#nextBtn').disabled=false; }}
+        },1000);
+      }
+
+      function nextQuestion(){
+        clearInterval(state.timer);
+        if(state.idx >= state.order.length){ return endGame(); }
+        state.answered=false; $('#nextBtn').disabled = true;
+        const pill=$('#statusPill'); if(pill) pill.textContent = `Питання ${state.idx+1} із ${state.order.length}`;
+        const hud = renderQuestion(state.order[state.idx]);
+        startTimer(hud);
+      }
+      window.nextQuestion = nextQuestion;
+
+      function endGame(){
+        clearInterval(state.timer);
+        const total = state.order.length; $('#statusPill').textContent = `Гру завершено. Рахунок: ${state.score} / ${total}`;
+        $('#startBtn').disabled = false; $('#nextBtn').disabled = true;
+
+        const title = el('h2',null,`Результат: ${state.score} з ${total}`);
+        const help = el('p',null,'Усі посади з фото та позначками «Вірно»/«Хиба».');
+        const grid = el('div','results-grid');
+        state.log.forEach(item=>{
+          const card = el('div','result-card');
+          const ph = el('div','result-photo');
+          const src = item.person.imageUrl || initialsAvatar(item.person.name);
+          const img=new Image(); img.alt=item.person.name; img.src=src; img.addEventListener('click', ()=>openLightbox(src, item.person.name));
+          ph.appendChild(img);
+          const info = el('div'); const t=el('div','result-title',item.person.name); const s=el('div','result-sub',`${item.person.rank} — ${item.person.position}`);
+          const tag = el('span',`tag ${item.correct?'ok':'bad'}`, item.correct? 'Вірно' : `Хиба${item.selected? ' ('+item.selected+')':''}`);
+          info.append(t,s); card.append(ph,info,tag); grid.appendChild(card);
+        });
+        const container = el('section','card'); container.append(title,help,grid);
+        $('#gameCard').innerHTML=''; $('#gameCard').appendChild(container);
+      }
+      window.endGame = endGame;
+
+      function handleAnswer(btn,isCorrect,selectedName){
+        if(state.answered) return; state.answered=true; clearInterval(state.timer);
+        document.querySelectorAll('button.choice').forEach(b=>b.disabled=true);
+        btn.classList.add(isCorrect?'correct':'wrong'); if(isCorrect) state.score++;
+        state.log.push({person: state.order[state.idx], correct:isCorrect, selected:selectedName});
+        updateScore();
+
+        // Показ фото + підпис при правильній відповіді (з коду imageUrl) + клік для збільшення
+        const q = state.order[state.idx];
+        const photoWrap = document.getElementById('photo');
+        const cap = document.getElementById('captionText');
+        const reveal = document.getElementById('reveal');
+        if(photoWrap && cap && reveal){
+          const src = q.imageUrl || initialsAvatar(q.name);
+          photoWrap.innerHTML=''; const im=new Image(); im.alt=q.name; im.src = src; im.addEventListener('click', ()=>openLightbox(src, q.name));
+          photoWrap.appendChild(im);
+          cap.querySelector('b').textContent = q.name;
+          cap.querySelector('.small').textContent = `${q.rank} — ${q.position}`;
+          reveal.style.display = isCorrect ? 'grid' : 'none';
+        }
+
+        $('#nextBtn').disabled=false; $('#nextBtn').focus();
+      }
+      window.handleAnswer = handleAnswer;
+
+      function startGame(){
+        state.order = shuffle(PEOPLE.slice()); state.idx=0; state.score=0; state.log=[]; state.answered=false; updateScore();
+        $('#startBtn').disabled = true; $('#nextBtn').disabled = true; toast('Поїхали!');
+        nextQuestion();
+      }
+      window.startGame = startGame;
+
+      function toast(msg){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.className='toast show'; setTimeout(()=>t.classList.remove('show'),1100); }
+      window.toast = toast;
+
+      // Події кнопок
+      document.getElementById('startBtn').addEventListener('click', startGame);
+      document.getElementById('nextBtn').addEventListener('click', ()=>{ if(!state.answered){ toast('Зробіть вибір'); return;} state.idx++; updateScore(); nextQuestion(); });
+    })();
+  </script>
+</body>
+</html>
