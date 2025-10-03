@@ -123,7 +123,7 @@
   <template id="questionTmpl">
     <div class="hud">
       <div class="badge" id="qCounter"></div>
-      <div class="badge" id="qTimer">⏱️ <span>20</span> с</div>
+      <div class="badge" id="qTimer">⏱️ <span>60</span> с</div>
       <div class="progress" aria-hidden="true"><div class="bar" id="qBar"></div></div>
     </div>
     <div class="question">
@@ -220,7 +220,7 @@
 
       function startTimer(hud){
         const {timerSpan, bar} = hud;
-        state.timeLeft = 20; if(timerSpan) timerSpan.textContent = state.timeLeft; if(bar) bar.style.width='0%';
+        state.timeLeft = 60; if(timerSpan) timerSpan.textContent = state.timeLeft; if(bar) bar.style.width='0%';
         const total = state.timeLeft;
         clearInterval(state.timer);
         state.timer = setInterval(()=>{
